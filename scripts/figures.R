@@ -1,22 +1,10 @@
-install.packages("haven") # Install package that can read stata files (.dta)
-install.packages("estimatr")
-install.packages("labelled")
-install.packages("tidyverse")
-install.packages("rddensity")
-install.packages("rdrobust")
-install.packages("modelsummary")
-install.packages("gghighlight")
+install.packages("haven") # Package that can read Stata (.dta) files
+install.packages("tidyverse") # Standard R packages, data manipulation, plotting etc. 
 install.packages("rddtools")
 install.packages("patchwork")
 
 library(tidyverse)
-library(estimatr)
 library(haven)
-library(labelled)
-library(rddensity)
-library(rdrobust)
-library(modelsummary)
-library(gghighlight)
 library(rddtools)
 library(patchwork)
 
@@ -30,20 +18,20 @@ complete_data <- data[complete.cases(x, d, y, data$ageshr19),]
 
 #FIGURE 1
 
+
 ggplot(complete_data, aes(x=vshr_islam1994, y=iwm94)) +
-  geom_point(color=ifelse(abs(complete_data$vi1)<=0.02, "black", "azure4")) +
+  geom_point(color=ifelse(abs(complete_data$iwm94)<=0.02, "black", "azure4")) +
   xlim(0, 0.75) +
   labs(x="Islamic vote share", y="Islamic win margin") +
   geom_abline(intercept=-1, slope=2, color="black") +
   geom_abline(intercept=0, slope=0, color="azure3") +
   theme_classic()
 
-
 #FIGURE 2
 
 #Histogram
 
-ggplot(complete_data, aes(x=vi1, y=after_stat(count/sum(count)))) +
+ggplot(complete_data, aes(x=iwm94, y=after_stat(count/sum(count)))) +
   geom_histogram(binwidth = 0.02, fill = "azure4", color="black")+
   scale_y_continuous(labels=percent) +
   xlim(-1, 1) +
@@ -111,7 +99,7 @@ means <- means[abs(means$average_margin) < 0.3, ] #Limit points to between -0.3 
 
 #Plot
 p <- ggplot(means, aes(x=average_margin, y=average_vote)) +
-  geom_point(size=3, color="#242424", size=0.5)+
+  geom_point(size=3, color="#242424")+
   geom_smooth(data=subset(cov_data, abs(iwm94)<0.3),
   aes(x=iwm94, y=.data[[i]], group=side),
   method="loess",
@@ -168,8 +156,8 @@ covariates_4 <- c(
 main_names <- c(
   hischshr1520f= "a) Women in 2000",
   hischshr1520m= "b) Men in 2000",
-  c90hischshr1520f= "c) Women in 1900",
-  c90hischshr1520m= "d) Men in 1900"
+  c90hischshr1520f= "c) Women in 1990",
+  c90hischshr1520m= "d) Men in 1990"
 )
 
 #Empty list to insert plots
@@ -193,7 +181,7 @@ means <- means[abs(means$average_margin) < 0.5, ] #Limit points to between -0.3 
 #Plot
 p <- ggplot(means, aes(x=average_margin, y=average_vote)) +
   geom_point(size=3, color="#242424")+
-  geom_smooth(data=subset(cov_data, abs(iwm94)<0.5),
+  geom_smooth(data=subset(cov_data4, abs(iwm94)<0.5),
   aes(x=iwm94, y=.data[[i]], group=side),
   method="loess",
   se=TRUE,
