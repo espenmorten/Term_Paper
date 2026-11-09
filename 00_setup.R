@@ -3,8 +3,12 @@ install.packages(
         'haven',
         'tidyverse',
         'gt',
-        'estimatr'
+        'estimatr',
+        'rddtools',
+        'patchwork'
     ),
     repos = 'https://cloud.r-project.org'
 )
 
+install.packages("rddtools")
+install.packages("patchwork")
