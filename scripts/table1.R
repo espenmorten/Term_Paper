@@ -6,7 +6,21 @@ table1_sample <- df |>
         mayor = factor(i94, levels = c(1, 0), labels = c('Islamic', 'Secular')) # Mayor is created as categorical variable, i94=1 means mayor is islamic, 0 means secular
     )
 
+significance_note <- '***, **, and * denote significance at the 1%, 5%, and 10% levels.' # Explaining the stars
+
+format_estimate <- function(estimate, std_error, p_value) {
+    stars <- case_when(
+        p_value < 0.01 ~ '***',
+        p_value < 0.05 ~ '**',
+        p_value < 0.1 ~ '*',
+        TRUE ~ ''
+    )
+
+    sprintf('%.3f%s  \n(%.3f)', estimate, stars, std_error)
+}
+
 # Calculate difference and standard errors for the fourth column
+<<<<<<< HEAD
 diff_se_p = function(data, variable, ...) { 
     if (variable == 'i94') {
         return(format_estimate(1, 0))
@@ -14,8 +28,25 @@ diff_se_p = function(data, variable, ...) {
     fit <- lm(data[[variable]] ~ i94, data = data) # Fit the regression that compares the 2 group means
     result <- summary(fit)$coefficients['i94', ] # Gets the coefficient row for the treatment variable i94
     format_estimate(result['Estimate'], result['Std. Error'], result['Pr(>|t|)']) # Display the estimate, std error and any significance stars from p value
+=======
+diff_se_p = function(data, variable, ...) { #Define function with input data and variable to be summarized. 
+    model <- lm(formula = data[[variable]] ~ i94, data = data) # Linear model, fitting variable by relationship 
+    result <- summary(model)$coefficients # Finding the coefficients
+    difference <- result['i94', 'Estimate'] # Storing difference
+    standard_error <- result['i94', 'Std. Error'] # Storing standard error
+    p_value <- result['i94', 'Pr(>|t|)'] # Storing p-value
+
+    stars <- # Assigning stars according to the 1, 5 and 10% significance levels 
+        if (variable == 'i94') '' else
+        if (p_value < 0.01)'***' else
+        if (p_value < 0.05) '**' else
+        if (p_value < 0.1) '*' else  ''
+
+    sprintf(fmt = '%.3f%s  \n(%.3f)', difference, stars, standard_error) # Formatting the output nicely with 3 decimals and linebreak
+>>>>>>> origin/main
 }
 # Create the summary table
+<<<<<<< HEAD
 table1 <- table1_sample |>
     tbl_summary( # From the gtsummary package we can create a summary table
         by = mayor, # group by
@@ -25,6 +56,17 @@ table1 <- table1_sample |>
     ) |>
     add_overall() |> # Add a 'All' column, keeping all the municipalities in the sample
     add_stat(fns = everything() ~ diff_se_p) |> # Add the fourth column, fns is short for functions, calling diff_se_p for every variable
+=======
+table1 <- data1 |>
+    tbl_summary( # From the gtsummary package
+        by = mayor, 
+        type = everything() ~ 'continuous', 
+        statistic = everything() ~ '{mean}  \n({sd})',
+        digits = everything() ~ 3
+    ) |>
+    add_overall() |>
+    add_stat(fns = everything() ~ diff_se_p) |>
+>>>>>>> origin/main
 
     # Adding the column headings
     modify_header(
@@ -51,6 +93,7 @@ table1 <- table1_sample |>
         stat_2 = as.character(sum(table1_sample$i94==0)), # Secular column
         add_stat_1 = as.character(nrow(table1_sample)) # Difference in means + S.E. column
     ) |> 
+<<<<<<< HEAD
     tab_spanner(label='Mayor Type', columns = c(stat_0, stat_1, stat_2))  |> # Shared heading
     tab_spanner(label='Difference', columns = add_stat_1)  |> 
     tab_header(title = 'TABLE I', subtitle = 'SUMMARY STATISTICS') |> 
@@ -61,3 +104,17 @@ table1 <- table1_sample |>
         )) |>
 
     fmt_markdown()
+=======
+    gt::tab_spanner(label='Mayor Type', columns = c(stat_0, stat_1, stat_2))  |>
+    gt::tab_spanner(label='Difference', columns = add_stat_1)  |>
+    gt::tab_header(title = 'TABLE I', subtitle = 'SUMMARY STATISTICS') |> 
+    gt::tab_source_note(source_note = paste(
+            'Columns 1-3 report means and standard deviations in parenthesis.', 
+            'Column 4 reports differences of group means between columns 2 and 3 with standard errors in parenthesis.',
+            '***, **, and * denote significance at the 1, 5 and 10 percent levels, respectively.'
+        )) |>
+
+    gt::fmt_markdown()
+
+print(table1)
+>>>>>>> origin/main
