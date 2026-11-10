@@ -1,50 +1,43 @@
-# Prepare data
-data3 <- education_sample |>
-    mutate(d = i94, x = iwm94, x2 = x^2, x3 = x^3, x4 = x^4)
+table3_h <- c(1, 0.5, 0.25, 0.1, 0.05) # Custom bandwidth list for table 3
+table3_orders <- names(control_functions)
+table3_rows <- c(table3_orders, 'Observations')
 
-# Custom bandwidth list for table 3
-h_list <- c(1, 0.5, 0.25, 0.1, 0.05)
-
-make_sample <- function(outcome, bandwidth) {
-    model_data <- data3
-    model_data$y <- model_data[[outcome]]
-}
-
-
-make_table3_panel <- function(outcome) {
-    panel <- tibble(label = c(names(control_function), 'Observations'))
-
-    for (column in seq_along(h_list)) {
-        bandwidth <- h_list[column]
-        model_data <- data3 |> filter(abs(x) < bandwidth)
-        model_data$y <- model_data[[outcome]]
-        estimates <- character(length(control_function))
-
-        for (row in seq_along(control_function)) {
-            terms <- c(control_function[[row]], controls)
-            formula <- reformulate(terms, response = 'y')
-
-            fit <- fit_clustered(formula, model_data)
-            estimates[row] <- mayor_cell(fit)
-        }
-
-        panel[[paste0('col', column)]] <- c(
-            estimates, as.character(nrow(model_data))
-        )
-    }
-
-    panel
-}
-
-women <- make_table3_panel('hischshr1520f')
-men <- make_table3_panel('hischshr1520m')
-
-# Format the two panels using gt.
-table3 <- bind_rows(
-    'Panel A: Women' = women,
-    'Panel B: Men' = men,
+table3_data <- bind_rows(
+    'Panel A: Women' = data.frame(label = table3_rows),
+    'Panel B: Men' = data.frame(label = table3_rows),
     .id = 'panel'
-) |>
+)
+
+table3_cells <- function(data) {
+    estimates <- character(length(table3_orders))
+
+    for (row in seq_along(table3_orders)) {
+        order <- table3_orders[row]
+        formula <- make_formula(order, regression_controls)
+        fit <- fit_clustered(formula, data)
+        estimates[row] <- mayor_cell(fit)
+    }
+    c(estimates, as.character(nrow(data)))
+}
+
+for (column in seq_along(table3_h)) {
+    h <- table3_h[column]
+    column_name <- paste0('col', column)
+
+    women_sample <- make_sample(
+        education_sample, 'hischshr1520f', h, include_boundary = FALSE
+    )
+    men_sample <- make_sample(
+        education_sample, 'hischshr1520m', h, include_boundary = FALSE
+    )
+
+    table3_data[[column_name]] <- c(
+        table3_cells(women_sample),
+        table3_cells(men_sample)
+    )
+}
+
+table3 <- table3_data |>
     gt(rowname_col = 'label', groupname_col = 'panel') |>
     tab_header(title = 'TABLE III', subtitle = 'Alternative RD Specifications') |>
     tab_stubhead(label = 'Polynomial order') |>
@@ -62,5 +55,3 @@ table3 <- bind_rows(
             'All specifications include the Table II controls.'
         )
     )
-
-print(table3)
