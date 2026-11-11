@@ -6,19 +6,6 @@ table1_sample <- df |>
         mayor = factor(i94, levels = c(1, 0), labels = c('Islamic', 'Secular')) # Mayor is created as categorical variable, i94=1 means mayor is islamic, 0 means secular
     )
 
-significance_note <- '***, **, and * denote significance at the 1%, 5%, and 10% levels.' # Explaining the stars
-
-format_estimate <- function(estimate, std_error, p_value) {
-    stars <- case_when(
-        p_value < 0.01 ~ '***',
-        p_value < 0.05 ~ '**',
-        p_value < 0.1 ~ '*',
-        TRUE ~ ''
-    )
-
-    sprintf('%.3f%s  \n(%.3f)', estimate, stars, std_error)
-}
-
 # Calculate difference and standard errors for the fourth column
 diff_se_p = function(data, variable, ...) { 
     if (variable == 'i94') {
