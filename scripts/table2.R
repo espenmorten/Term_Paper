@@ -95,11 +95,7 @@ table2 <- table2_data |>
     # Bandwidth
     tab_spanner('Bandwidth', columns = label, level = 1) |>
     tab_spanner('Global', columns = col1:col2, level = 1) |>
-<<<<<<< HEAD
     tab_spanner('\u0125', columns = col3:col4, level = 1, id=1) |> # \u0125 renderes as h_hat in html files.
-=======
-    tab_spanner('\u0125', columns = col3:col4, level = 1, id=1) |>
->>>>>>> origin/main
     tab_spanner('\u0125/2', columns = col5, level = 1) |>
     tab_spanner('2\u0125', columns = col6, level = 1) |>
     tab_spanner('\u0125', columns = col7:col9, level = 1, id=2)|>
@@ -122,17 +118,4 @@ table2 <- table2_data |>
     tab_spanner('Completed high school in 2000', columns = col1:col8, level = 4) |>
     tab_spanner('Enrollment', columns = col9, level = 4) |>
 
-<<<<<<< HEAD
     style_rd_table()
-=======
-
-    tab_header(title = "TABLE II", subtitle = "Islamic Rule and High School Education") |>
-    tab_style(
-        style = cell_text(whitespace = "pre-line"),
-        locations = cells_body(columns = col1:col9)
-    ) |>
-    tab_source_note("Standard errors are clustered by province. ***, ** and * indicate the 1%, 5% and 10% levels.")
-
-print(table2)
-
->>>>>>> origin/main
