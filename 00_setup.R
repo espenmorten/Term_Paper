@@ -5,10 +5,10 @@ install.packages(
         'gt',
         'estimatr',
         'rddtools',
-        'patchwork'
+        'patchwork',
+        'gtsummary',
+        'rdrobust',
+        'this.path'
     ),
     repos = 'https://cloud.r-project.org'
 )
-
-install.packages("rddtools")
-install.packages("patchwork")
