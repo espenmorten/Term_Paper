@@ -3,22 +3,14 @@
 # TECH6 - Data Science and Econometrics
 # ============================================================
 
-library(tidyverse) # Standard R packages, data manipulation, plotting etc.
-library(haven) # Package that can read Stata (.dta) files
-library(rddtools) # McCrary discontinuity test, DCdensity from the paper is archived
-library(patchwork) # Composing several plots into one
-
-data <- read_dta("data/regdata0.dta")
-
-
 # ============================================================
 #Figure 1
 # ============================================================
 
 # Keep only non-missing values of Islamic vote share and Islamic win margin
-fig1_data <- data[complete.cases(data$vshr_islam1994, data$iwm94), ]
+fig1_data <- df[complete.cases(df$vshr_islam1994, df$iwm94), ]
 
-ggplot(fig1_data, aes(x=vshr_islam1994, y=iwm94)) +
+fig1 <- ggplot(fig1_data, aes(x=vshr_islam1994, y=iwm94)) +
 # Highlight points within +/- 2% of winning cutoff (close elections)
   geom_point(color=ifelse(abs(fig1_data$iwm94)<=0.02, "black", "azure4")) +
   xlim(0, 0.75) +
@@ -36,9 +28,9 @@ ggplot(fig1_data, aes(x=vshr_islam1994, y=iwm94)) +
 # Histogram of the running variable
 
 # Keep only non-missing values of Islamic win margin
-fig2_data <- data[complete.cases(data$iwm94), ]
+fig2_data <- df[complete.cases(df$iwm94), ]
 
-ggplot(fig2_data, aes(x=iwm94, y=after_stat(count/sum(count)))) +
+fig2a <- ggplot(fig2_data, aes(x=iwm94, y=after_stat(count/sum(count)))) +
 # Display distribution of running variable with binwidth=0.02
   geom_histogram(binwidth = 0.02, fill = "azure4", color="black")+
   scale_y_continuous(labels=percent) +
@@ -51,20 +43,24 @@ ggplot(fig2_data, aes(x=iwm94, y=after_stat(count/sum(count)))) +
 # Density test
 
 # Keep only non-missing values of the outcome variable and running variable within +/- 0.6
-mctest_data <- data[
-  complete.cases(data$hischshr1520f, data$iwm94) &
-  abs(data$iwm94)< 0.6, ] 
+mctest_data <- df[
+  complete.cases(df$hischshr1520f, df$iwm94) &
+  abs(df$iwm94)< 0.6, ] 
 
 # Organizing the data for the analysis with "rdd_data()", cutoff=0.
 density_data <- rdd_data(y=mctest_data$hischshr1520f, x=mctest_data$iwm94, cutpoint=0)
 # McCrary density test: Checking for discontinuity in the density of the running variable at the cutoff
-dens_test(density_data)
-abline(v=0, lty=2, col="black")
-title(
-  xlab="Islamic win margin 1994",
-  ylab="Density"
-)
+save_density_plot <- function(filename) {
+  png(filename, width = 1800, height = 1200, res = 220)
 
+  density_test <- dens_test(density_data, plot = TRUE)
+
+  abline(v=0, lty=2, col='black')
+
+  title(xlab = 'Islamic win margin 1994', ylab = 'Density')
+
+  dev.off()
+}
 
 # ============================================================
 #Figure 3
@@ -101,8 +97,8 @@ plots <- list()
 for (i in covariates) {
 
 # Keep only non-missing values of each covariate and the running variable
-cov_data <- data[
-  complete.cases(data[[i]], data$iwm94), ]
+cov_data <- df[
+  complete.cases(df[[i]], df$iwm94), ]
 
 # Creating bins with trunc(), truncating the win margin toward zero
 cov_data$bin <- trunc(cov_data$iwm94*25/2)
@@ -162,7 +158,7 @@ plots[[i]] <- p
 }
 
 # Combining all eight covariate plots into one
-wrap_plots(plots, ncol=2)
+fig3 <- wrap_plots(plots, ncol=2)
 
 
 # ============================================================
@@ -191,8 +187,8 @@ plots_fig4 <- list()
 for (i in outcomes_4) {
 
 # Keep only non-missing values of outcome and the running variable
-outcome_data4 <- data[
-  complete.cases(data[[i]], data$iwm94), ]
+outcome_data4 <- df[
+  complete.cases(df[[i]], df$iwm94), ]
 
 # Creating bins with trunc(), truncating the win margin toward zero
 outcome_data4$bin <- trunc(outcome_data4$iwm94*25)
@@ -231,6 +227,6 @@ plots_fig4[[i]] <- p
 }
 
 # Combine all outcome plots
-wrap_plots(plots_fig4, ncol=2)+
+fig4 <- wrap_plots(plots_fig4, ncol=2)+
 # Create shared axis titles
 plot_layout(axis_titles="collect")
