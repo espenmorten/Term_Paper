@@ -23,8 +23,8 @@ message('Reading data from ', data_file)
 df <- read_dta(data_file)
 source('shared.R')
 
-
 output_dir <- file.path(project_dir, 'files_produced')
+dir.create(output_dir, showWarnings = FALSE)
 
 # Replicating figures
 source("scripts/figures.R")
