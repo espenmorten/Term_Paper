@@ -104,3 +104,18 @@ style_rd_table <- function(gt_table, note = NULL) { #Standardize formatting
         ) |>
         tab_source_note(paste(source_note, collapse = ' '))
 }
+
+fit_extension_rd <- function(data, covariates = NULL, h = NULL, b = NULL, kernel = 'triangular') {
+    rdrobust(
+        y = data$y,
+        x = data$x,
+        c = 0,
+        p = 1, 
+        q = 2, 
+        h = h,
+        b = b,
+        kernel = kernel,
+        covs = covariates,
+        cluster = data$pcode
+    )
+}
