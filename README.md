@@ -4,6 +4,7 @@
 This repository contains the code for replication of selected figures and tables from Meyersson's paper from 2014, called Islamic rule and the empowerment of the poor and pious, where he investigates whether electing an Islamic mayor in Turkey's 1994 municipal elections affected women's education. It uses a regression discontinuity design where municipalities where the Islamic candidate barely won are compared with the municipalities where the Islamic candidate barely lost. 
 
 ## Repository structure
+'''text 
 Term_Paper
 ├── README.md
 ├── run_all.R
@@ -15,10 +16,11 @@ Term_Paper
 │   ├── table1.R
 │   ├── table2.R
 │   ├── table3.R
-│   ├── table4.R
+│   ├── table7.R
 │   ├── extension1.R
 │   ├── extension2.R
 └── files_produced/
+'''
 
 ## Setup
 1. Download or fork this repository
