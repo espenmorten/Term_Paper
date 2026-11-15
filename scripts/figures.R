@@ -7,12 +7,12 @@
 #Figure 1
 # ============================================================
 
-# Keep only non-missing values of Islamic vote share and Islamic win margin
-fig1_data <- df[complete.cases(df$vshr_islam1994, df$iwm94), ]
+# Keep only observations with non-missing values for the chosen variables in "$contr" in the file "graphs_R4_final.do" from the original replication code.
+fig1_data <- df[complete.cases(df$vshr_islam1994, df$iwm94, df$partycount, df$lpop1994, df$ageshr19, df$ageshr60, df$sexr, df$merkezi, df$merkezp, df$subbuyuk, df$buyuk, df$shhs, df$hischshr1520f), ]
 
 fig1 <- ggplot(fig1_data, aes(x=vshr_islam1994, y=iwm94)) +
 # Highlight points within +/- 2% of winning cutoff (close elections)
-  geom_point(color=ifelse(abs(fig1_data$iwm94)<=0.02, "black", "azure4")) +
+  geom_point(color=ifelse(abs(fig1_data$iwm94)<0.02, "black", "azure4")) +
   xlim(0, 0.75) +
   labs(x="Islamic vote share", y="Islamic win margin") +
 # Win margin = 2*Islamic vote share -1 (diagonal line)
@@ -31,14 +31,15 @@ fig1 <- ggplot(fig1_data, aes(x=vshr_islam1994, y=iwm94)) +
 fig2_data <- df[complete.cases(df$iwm94), ]
 
 fig2a <- ggplot(fig2_data, aes(x=iwm94, y=after_stat(count/sum(count)))) +
-# Display distribution of running variable with binwidth=0.02
-  geom_histogram(binwidth = 0.02, fill = "azure4", color="black")+
+# Display distribution of running variable with number of bins = 99
+  geom_histogram(bins = 99, fill = "azure4", color="black")+
   scale_y_continuous(labels=percent) +
   xlim(-1, 1) +
   labs(x="Islamic win margin", y="Percent") +
 # Cutoff line at 0, the threshold for winning the election
   geom_vline(xintercept = 0, linetype = "dashed")+
   theme_classic()
+
 
 # Density test
 
@@ -61,6 +62,7 @@ save_density_plot <- function(filename) {
 
   dev.off()
 }
+
 
 # ============================================================
 #Figure 3
