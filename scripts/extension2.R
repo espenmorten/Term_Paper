@@ -1,62 +1,62 @@
 # ============================================================
-# Extension 2: Missing data and sample selection
+# Extension 2: Population growth and age composition
 # ============================================================
-extension_rd_rows <- c( # The names of the rows in our table
-    'Conventional RD estimate',
-    'Conventional 95% CI',
-    'Bias-corrected RD estimate',
-    'Robust bias-corrected 95% CI',
-    'Estimation bandwidth (h)',
-    'Bias bandwidth (b)',
-    'Municipalities within h'
-)
 
-election_sample <- df |>
-    drop_na(i94, iwm94, pcode) |>
-    mutate(x = iwm94, has_2011_data = as.integer(!is.na(ahischshr15_19f))) # we add a column that is equal to 1 if the municipality has data in 2011, 0 otherwise
-
-availability_sample <- make_sample(election_sample, 'has_2011_data', h = Inf) # the sample of municipalities 
-availability_fit <- fit_extension_rd(availability_sample)
-
-completion_2000_sample <- make_sample(election_sample, 'hischshr1520f', h = Inf)
-both_sample <- completion_2000_sample |>
-    filter(has_2011_data == 1)
-
-completion_2000_fit <- fit_extension_rd(completion_2000_sample)
-h <- completion_2000_fit$bws['h', 'left']
-b <- completion_2000_fit$bws['b', 'left']
-
-both_fit <- fit_extension_rd(both_sample, h = h, b = b)
-
-extension2_data <- data.frame(
-    label = extension_rd_rows,
-    availability = extension_rd_cells(availability_fit),
-    all_2000 = extension_rd_cells(completion_2000_fit),
-    both_years = extension_rd_cells(both_fit)
-)
-
-extension2_table <- extension2_data |>
-    gt(rowname_col = 'label') |>
-    tab_header(title = 'Extension2', subtitle = '2011 availability and sample selection') |>
-    tab_spanner('High school completion in 2000', columns = c(all_2000, both_years)) |>
-    cols_label(
-        availability = 'Jump in 2011 availability',
-        all_2000 = '2000 outcome recorded',
-        both_years = 'Both outcomes recorded'
+population_sample <- rd_base_sample |>
+    drop_na(c90lpop, lpop, c90ageshr19, ageshr19) |>
+    mutate(
+        log_population_growth = lpop - c90lpop,
+        youth_share_change = 100 * (ageshr19 - c90ageshr19)
     )
 
-availability_plot_result <- rdplot(
-    y = availability_sample$y,
-    x = availability_sample$x,
-    c = 0,
-    p = 1,
-    h = availability_fit$bws['h', ],
-    kernel = 'triangular',
-    x.lim = c(-0.3, 0.3),
-    x.label = 'Islamic win margin in 1994',
-    y.label = 'Share with 2011 outcome observed',
-    title = 'Availability of 2011 female education data',
-    hide = TRUE,
+population_controls <- setdiff( # Control list for this extension
+    regression_controls, c('ageshr19', 'ageshr60', 'sexr', 'shhs') # These four controls are recorded in 2000, so 
 )
 
-extension2_plot <- availability_plot_result$rdplot
+did_formula <- make_formula('None') # Build y ~ d
+adjusted_did_formula <- make_formula('None', population_controls) # Adds controls
+
+population_results <- data.frame() # The list we'll add the results to after each run
+
+bandwidths <- c(0.25, 0.1, 0.5) # Main, narrower, wider bandwidths
+
+for (row in seq_len(nrow(population_outcomes))) { 
+    outcome <- population_outcomes$outcome[row] # Find and store outcome
+
+    for (h in bandwidths) {
+        model_sample <- make_sample(population_sample, outcome, h=h) # Create a sample based on the bandwidth in the sequence
+        did_fit <- fit_clustered(did_formula, model_sample) # Fit plain DiD
+        adjusted_did_fit <- fit_clustered(adjusted_did_formula, model_sample) # Fit adjusted DiD
+
+        did_jump <- summary(did_fit)$coefficients['d', ] # Extract coefficients on d (plain did)
+        adj_did_jump <- summary(adjusted_did_fit)$coefficients['d', ] # Extract coefficients on d (adj. did)
+        jumps <- rbind(did_jump, adj_did_jump) # Bind the rows together
+
+        outcome_results <- data.frame(
+            outcome = population_outcomes$label[row], # Display label for model rows
+            model = c('DiD', 'DiD with controls'), # Label the models
+            bandwidth = h, 
+            municipalities = nrow(model_sample), # Observations/number of municipalities
+            estimate = jumps[, 'Estimate'], # Estimate
+            ci_lower = jumps[, 'CI Lower'], # Lower confidence interval bound
+            ci_upper = jumps[, 'CI Upper'], # Upper confidence interval bound
+            p_value = jumps[, 'Pr(>|t|)'] # P value
+        )
+        population_results <- bind_rows(population_results, outcome_results)
+    }
+}
+
+extension2_table <- population_results |>
+    gt(groupname_col = 'outcome') |>
+    tab_header(title = 'Extension 2: Population growth and age composition', subtitle = '1990 - 2000') |> 
+    cols_label( # Printed column labels
+        model = 'Model',
+        bandwidth = 'Bandwidth',
+        municipalities = 'Municipalities',
+        estimate = 'DiD Estimate',
+        ci_lower = '95% CI',
+        p_value = 'P-value'
+    ) |>
+    fmt_number(columns = c(bandwidth, estimate, ci_lower, ci_upper, p_value), decimals = 3) |> # Round decimals
+    cols_merge(columns = c(ci_lower, ci_upper), pattern = '[{1}, {2}]') |> # Format confidence intervals in [{lower}, {upper}]
+    tab_source_note('')
