@@ -41,6 +41,7 @@ control_functions <- c(
 # optimal bandwidth. This algorithm is available as a function in an old version of rddtools
 ik_h <- function(data) {
     h <- rdd::IKbandwidth(data$x, data$y, cutpoint = 0, kernel = 'triangular')
+    h <- h * (3.4375/3.43754) # From Meyersson's replication files - he adjusts with another multiplier
 }
 
 make_sample <- function(data, outcome, h, include_boundary = TRUE) {
