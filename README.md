@@ -27,9 +27,10 @@ Term_Paper
 </pre>
 
 ## Setup
-1. Download and extract the repository ZIP, or fork this repository
-2. Make sure 'regdata0.dta' is in the 'data/' folder
-3. Open 'Term_Paper.Rproj' in RStudio
-4. Run '00_setup.R' to install required packages.
-5. Run 'run_all.R' to regenerate all tables, figures and extensions.
+1. Download and extract the repository ZIP
+2. Open RStudio
+3. Open file '00_setup.R' and click **Source** to install required packages.
+4. Open file 'run_all.R' and click **Source** to regenerate all tables, figures and extensions.
+
+The tables, figures and extensions will be saved in files_produced in the extracted folder.
 
