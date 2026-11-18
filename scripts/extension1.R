@@ -16,8 +16,8 @@ women_20_24_sample <- make_sample(adult_sample, 'ahischshr20_24f', h = 1) # Keep
 women_25_29_sample <- make_sample(adult_sample, 'ahischshr25_29f', h = 1)
 
 adult_bandwidths <- c( # Calculating the 2 bandwidths. 
-    'IK bandwidth from women aged 20-24' = ik_h(women_20_24_sample), # Bandwidth 1 is using the imbens & kalyanaraman algorithm on the 20-24 women sample
-    'IK bandwidth from women aged 25-29' = ik_h(women_25_29_sample) # Bandwidth 2 is using the imbens & kalyanaraman algorithm on the 20-24 women sample
+    'Bandwidth 1: women aged 20-24' = ik_h(women_20_24_sample), # Bandwidth 1 is using the imbens & kalyanaraman algorithm on the 20-24 women sample
+    'Bandwidth 2: women aged 25-29' = ik_h(women_25_29_sample) # Bandwidth 2 is using the imbens & kalyanaraman algorithm on the 20-24 women sample
 )
 
 adult_comparisons <- data.frame(
