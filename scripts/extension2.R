@@ -13,6 +13,11 @@ population_controls <- setdiff( # Control list for this extension
     regression_controls, c('ageshr19', 'ageshr60', 'sexr', 'shhs') # These four controls are recorded in 2000, so 
 )
 
+population_outcomes <- data.frame(
+    outcome = c('log_population_growth', 'youth_share_change'),
+    label = c('Log population growth (log points)', 'Change in share under 19 (percentage points)')
+)
+
 did_formula <- make_formula('None') # Build y ~ d
 adjusted_did_formula <- make_formula('None', population_controls) # Adds controls
 
